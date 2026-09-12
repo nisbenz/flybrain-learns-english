@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "task": "association",
+  "chance": 0.5,
+  "per_seed": [
+    {
+      "seed": 11,
+      "best_examples_seen": 32,
+      "learned": 0.453125,
+      "frozen": 0.4375
+    },
+    {
+      "seed": 23,
+      "best_examples_seen": 32,
+      "learned": 0.46875,
+      "frozen": 0.46875
+    },
+    {
+      "seed": 37,
+      "best_examples_seen": 32,
+      "learned": 0.453125,
+      "frozen": 0.453125
+    }
+  ],
+  "mean_accuracy": {
+    "learned": 0.4583333333333333,
+    "frozen": 0.453125
+  },
+  "hierarchical_bootstrap_95_ci": {
+    "learned": [
+      0.3854166666666667,
+      0.53125
+    ],
+    "learned_minus_frozen": [
+      0.0,
+      0.02083333333333337
+    ],
+    "learned_minus_chance": [
+      -0.11458333333333331,
+      0.03125
+    ]
+  },
+  "claim": "No learning unless learned-minus-frozen and learned-minus-chance are positive."
+}
