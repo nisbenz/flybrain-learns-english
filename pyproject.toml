@@ -1,0 +1,43 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "flybrain-language"
+version = "0.1.0"
+description = "Connectome-constrained reward-modulated spiking next-word prediction prototype"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "GPL-2.0-or-later" }
+dependencies = [
+  "matplotlib==3.10.1",
+  "numpy==2.2.4",
+  "pandas==2.2.3",
+  "pyarrow==19.0.1",
+  "pyyaml==6.0.2",
+  "torch==2.6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==8.3.5", "pytest-cov==6.0.0"]
+
+[project.scripts]
+flybrain-language = "flybrain_language.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/flybrain_language"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.uv]
+default-groups = []
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
