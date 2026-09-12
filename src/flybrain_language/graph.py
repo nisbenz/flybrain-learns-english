@@ -82,17 +82,6 @@ def _fill_connected(edges: pd.DataFrame, selected: set[int], target: int) -> set
     return selected
 
 
-def _corridor_mask(pre: np.ndarray, post: np.ndarray, mbons: set[int], outputs: set[int]) -> np.ndarray:
-    forward = set(mbons)
-    for _ in range(3):
-        forward.update(map(int, post[np.isin(pre, list(forward))]))
-    backward = set(outputs)
-    for _ in range(3):
-        backward.update(map(int, pre[np.isin(post, list(backward))]))
-    corridor = forward.intersection(backward)
-    return np.isin(pre, list(corridor)) & np.isin(post, list(corridor))
-
-
 def prepare_connectome(
     completeness_path: Path,
     connectivity_path: Path,
@@ -143,9 +132,12 @@ def prepare_connectome(
     lookup = pd.Series(np.arange(len(selected_ids)), index=selected_ids)
     local_pre = lookup.loc[kept.Presynaptic_ID].to_numpy(np.int64)
     local_post = lookup.loc[kept.Postsynaptic_ID].to_numpy(np.int64)
-    plastic = np.isin(kept.Presynaptic_ID, list(input_ids)) | _corridor_mask(
-        kept.Presynaptic_ID.to_numpy(), kept.Postsynaptic_ID.to_numpy(),
-        set(map(int, mbon_ids)), output_ids,
+    kept_pre = kept.Presynaptic_ID.to_numpy()
+    kept_post = kept.Postsynaptic_ID.to_numpy()
+    plastic = (
+        np.isin(kept_pre, kc_ids)
+        | np.isin(kept_pre, mbon_ids)
+        | (np.isin(kept_pre, list(paths)) & np.isin(kept_post, list(paths)))
     )
     graph = Connectome(
         selected_ids, local_pre, local_post,

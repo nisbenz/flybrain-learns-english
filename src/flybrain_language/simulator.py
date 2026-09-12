@@ -34,11 +34,15 @@ class FlyLIFSimulator:
         self.graph = graph
         self.dynamics = dynamics
         self.learning = learning
-        self.pre = torch.from_numpy(graph.pre).long()
-        self.post = torch.from_numpy(graph.post).long()
-        self.weights = torch.from_numpy(graph.weights).float().clone()
+        raw_pre = torch.from_numpy(graph.pre).long()
+        raw_post = torch.from_numpy(graph.post).long()
+        order = torch.argsort(raw_post * len(graph.flywire_ids) + raw_pre, stable=True)
+        self.pre = raw_pre[order]
+        self.post = raw_post[order]
+        self.weights = torch.from_numpy(graph.weights).float()[order].clone()
         self.original_weights = self.weights.clone()
-        self.plastic_indices = torch.from_numpy(graph.plastic.nonzero()[0]).long()
+        plastic = torch.from_numpy(graph.plastic)[order]
+        self.plastic_indices = plastic.nonzero().flatten()
         self.plastic_pre = self.pre[self.plastic_indices]
         self.plastic_post = self.post[self.plastic_indices]
         self.generator = torch.Generator(device="cpu").manual_seed(seed)
@@ -47,6 +51,11 @@ class FlyLIFSimulator:
         self.total_spikes = 0
         self.steps = 0
         self.activity_counts = torch.zeros(self.neuron_count, dtype=torch.long)
+        counts = torch.bincount(self.post, minlength=self.neuron_count)
+        crow = torch.cat([torch.zeros(1, dtype=torch.long), counts.cumsum(0)])
+        self.sparse_weights = torch.sparse_csr_tensor(
+            crow, self.pre, self.weights, size=(self.neuron_count, self.neuron_count)
+        )
         self.reset()
 
     @property
@@ -70,8 +79,7 @@ class FlyLIFSimulator:
         state.refractory = torch.where(
             state.spikes.bool(), torch.zeros_like(state.refractory), state.refractory + 1
         )
-        recurrent = torch.zeros(self.neuron_count)
-        recurrent.index_add_(0, self.post, state.spikes[self.pre] * self.weights)
+        recurrent = torch.mv(self.sparse_weights, state.spikes)
         available = (state.refractory >= refractory_steps).float()
         new_conductance = (
             state.conductance * (1 - cfg.dt_ms / cfg.tau_syn_ms)
