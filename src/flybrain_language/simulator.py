@@ -72,7 +72,8 @@ class FlyLIFSimulator:
         )
 
     def _step(
-        self, stimulated: torch.Tensor | None, forced_voltage: torch.Tensor | None = None
+        self, stimulated: torch.Tensor | None, forced_voltage: torch.Tensor | None = None,
+        track_eligibility: bool = True,
     ) -> torch.Tensor:
         cfg, state = self.dynamics, self.state
         refractory_steps = round(cfg.refractory_ms / cfg.dt_ms)
@@ -103,7 +104,8 @@ class FlyLIFSimulator:
         )
         new_conductance = torch.where(state.spikes.bool(), 0.0, new_conductance)
         state.conductance = new_conductance
-        self._update_eligibility()
+        if track_eligibility:
+            self._update_eligibility()
         count = int(state.spikes.sum())
         self.total_spikes += count
         self.activity_counts.add_(state.spikes.long())
@@ -158,12 +160,12 @@ class FlyLIFSimulator:
         gap_steps = round(gap_ms / cfg.dt_ms)
         prediction_steps = round(prediction_ms / cfg.dt_ms)
         for _ in range(presentation_steps):
-            self._step(input_indices)
+            self._step(input_indices, track_eligibility=learn)
         for _ in range(gap_steps):
-            self._step(None)
+            self._step(None, track_eligibility=learn)
         counts = torch.zeros(output_indices.shape[0])
         for _ in range(prediction_steps):
-            spikes = self._step(None)
+            spikes = self._step(None, track_eligibility=learn)
             counts += spikes[output_indices].float().mean(dim=1)
         prediction = int(torch.argmax(counts))
         maximum = counts.max()
