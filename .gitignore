@@ -7,6 +7,6 @@ data/processed/
 runs/*/checkpoints/
 runs/*/representations.npz
 runs/*/spikes/
+/runs/
 *.pt
 *.pth
-

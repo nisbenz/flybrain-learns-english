@@ -21,6 +21,17 @@ def _load_jsonl(path: Path) -> list[dict]:
     return [json.loads(line) for line in path.read_text().splitlines()]
 
 
+def _compact(metrics: dict) -> dict:
+    fields = (
+        "top1_accuracy", "top5_accuracy", "cross_entropy", "perplexity",
+        "retained_word_accuracy", "macro_accuracy", "unk_target_fraction",
+        "silent_fraction", "tie_fraction", "mean_firing_rate_hz",
+        "active_neuron_fraction", "plastic_weight_mean_absolute_change",
+        "weight_bound_saturation",
+    )
+    return {field: metrics[field] for field in fields if field in metrics}
+
+
 def _paired_ci(run_dirs: list[Path], comparator: str, retained: bool, seed: int = 2026) -> dict:
     blocks = []
     for run in run_dirs:
@@ -82,8 +93,9 @@ def summarize(run_dirs: list[Path], output_dir: Path) -> dict:
             "best_validation_accuracy": train["best_validation_accuracy"],
             "best_pairs_seen": train["best_pairs_seen"],
             "training_seconds": train["elapsed_seconds"],
-            "learned": evaluation["learned"], "frozen": evaluation["frozen"],
-            "frequency": evaluation["frequency"],
+            "learned": _compact(evaluation["learned"]),
+            "frozen": _compact(evaluation["frozen"]),
+            "frequency": _compact(evaluation["frequency"]),
             "semantic_context_correlation": semantics["context_similarity_correlation"],
         } for train, evaluation, semantics in zip(training, evaluations, semantic)],
         "success": False,
@@ -92,8 +104,14 @@ def summarize(run_dirs: list[Path], output_dir: Path) -> dict:
     }
     ablation_path = run_dirs[0] / "ablation_metrics.json"
     if ablation_path.exists():
-        report["ablations"] = _load_json(ablation_path)
-    (output_dir / "pilot_summary.json").write_text(json.dumps(report, indent=2) + "\n")
+        ablations = _load_json(ablation_path)
+        report["ablations"] = {
+            name: {"train_pairs": value["train_pairs"], **_compact(value["test"])}
+            for name, value in ablations.items()
+        }
+    (output_dir / "pilot_summary.json").write_text(
+        json.dumps(report, separators=(",", ":")) + "\n"
+    )
     _performance_plot(aggregate, output_dir / "performance.png")
     _training_plot(training, output_dir / "training_stability.png")
     return report

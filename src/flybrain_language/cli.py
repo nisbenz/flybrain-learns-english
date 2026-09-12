@@ -71,7 +71,7 @@ def main(argv: list[str] | None = None) -> None:
         config = load_config(args.config)
         result = run_reference_check(
             root / "data" / "raw", config.dynamics,
-            root / "runs" / "reference_check.json",
+            root / "results" / "reference_check.json",
         )
     elif args.command == "activity-check":
         from .activity import run_activity_check
