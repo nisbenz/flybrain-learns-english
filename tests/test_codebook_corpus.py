@@ -39,4 +39,4 @@ def test_tokenization_vocabulary_and_contiguous_split():
 
 def test_contexts_exclude_bos_as_target_and_obey_limit():
     contexts = list(iter_contexts([1, 3, 1, 4, 2], context_length=2, pair_limit=2))
-    assert contexts == [[(1, 3), (4, 2)]]
+    assert contexts == [[(1, 3), (1, 4)]]

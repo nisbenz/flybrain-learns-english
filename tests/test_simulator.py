@@ -24,7 +24,7 @@ def test_reward_uses_previous_baseline_and_preserves_sign_bounds(small_graph, fa
     simulator.state.eligibility.fill_(100)
     first_error = simulator.apply_reward(True)
     assert first_error == 1.0
-    assert simulator.reward_baseline == 0.02
+    assert abs(simulator.reward_baseline - 0.02) < 1e-12
     assert simulator.weights[0] == 3.0
     assert simulator.weights[1] == -1.5
     assert torch.equal(simulator.weights[2:], simulator.original_weights[2:])
