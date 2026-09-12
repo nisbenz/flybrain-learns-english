@@ -62,7 +62,9 @@ class FlyLIFSimulator:
             torch.zeros(n), torch.zeros(n), torch.zeros(len(self.plastic_indices)),
         )
 
-    def _step(self, stimulated: torch.Tensor | None) -> torch.Tensor:
+    def _step(
+        self, stimulated: torch.Tensor | None, forced_voltage: torch.Tensor | None = None
+    ) -> torch.Tensor:
         cfg, state = self.dynamics, self.state
         refractory_steps = round(cfg.refractory_ms / cfg.dt_ms)
         state.refractory = torch.where(
@@ -77,7 +79,7 @@ class FlyLIFSimulator:
         )
         state.delay = torch.roll(state.delay, -1, dims=0)
         state.delay[-1] = cfg.weight_scale_mv * recurrent
-        voltage_stim = torch.zeros(self.neuron_count)
+        voltage_stim = torch.zeros(self.neuron_count) if forced_voltage is None else forced_voltage.clone()
         if stimulated is not None and len(stimulated):
             draws = torch.rand(len(stimulated), generator=self.generator)
             fired = draws < cfg.input_rate_hz * cfg.dt_ms / 1000.0
