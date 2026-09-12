@@ -51,12 +51,17 @@ units on average, and none reached configured bounds.
 
 ## Controls and representations
 
-The size/density-matched random graph scored 0.0208 top-1 and fired at 63.1 Hz;
-the degree-preserving shuffled graph scored 0.0104 and fired at 22.5 Hz. Their
-high firing rates show that topology randomization did not preserve the stable
-activity regime, so they are useful failure controls rather than clean evidence
-for an anatomical advantage. Restoring the learned network's original weights
-exactly reproduced the frozen result for every seed.
+The size/density-matched random graph scored 0.0260 top-1 and fired at 63.1 Hz;
+the degree-preserving shuffled graph scored 0.0104 and fired at 22.4 Hz. Both
+controls selected their 96-pair checkpoint using the primary validation rule.
+Their high firing rates show that topology randomization did not preserve the
+stable activity regime, so they are useful failure controls rather than clean
+evidence for an anatomical advantage. Restoring the learned network's original
+weights exactly reproduced the frozen result for every seed.
+
+Recorded primary training time totaled 1,220.8 seconds across three seeds; the
+two validation-selected topology controls totaled 442.9 seconds. The activity
+benchmark averaged 0.339 seconds per simulated word.
 
 Learned internal-state/context-similarity correlations were −0.110, −0.077,
 and −0.047. Frozen correlations were 0.009, −0.157, and −0.073. These values
