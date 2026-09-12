@@ -70,6 +70,9 @@ def build_parser() -> argparse.ArgumentParser:
     plasticity.add_argument("--validation-examples", type=int, default=32)
     plasticity.add_argument("--test-examples", type=int, default=64)
     plasticity.add_argument("--noise-std-mv", type=float)
+    plasticity_summary = commands.add_parser("plasticity-summary")
+    plasticity_summary.add_argument("--runs", type=Path, nargs="+", required=True)
+    plasticity_summary.add_argument("--output", type=Path, required=True)
     summary = commands.add_parser("summarize")
     summary.add_argument("--runs", type=Path, nargs="+", required=True)
     summary.add_argument("--output", type=Path, default=Path("results"))
@@ -126,6 +129,11 @@ def main(argv: list[str] | None = None) -> None:
             args.config, root, args.task, args.seed, args.train_examples,
             args.validation_examples, args.test_examples, args.noise_std_mv,
         ))}
+    elif args.command == "plasticity-summary":
+        from .probe_reporting import summarize_plasticity_probes
+        result = summarize_plasticity_probes(
+            [path.resolve() for path in args.runs], args.output.resolve()
+        )
     elif args.command == "summarize":
         from .reporting import summarize
         result = summarize([path.resolve() for path in args.runs], args.output.resolve())
