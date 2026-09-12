@@ -4,6 +4,7 @@ import numpy as np
 
 from flybrain_language.codebook import generate_codebooks, load_codebooks
 from flybrain_language.corpus import Vocabulary, contiguous_split, iter_contexts, tokenize
+from flybrain_language.metrics import frequency_baseline
 
 
 def test_fixed_codebooks_are_deterministic_and_outputs_disjoint(tmp_path: Path):
@@ -40,3 +41,10 @@ def test_tokenization_vocabulary_and_contiguous_split():
 def test_contexts_exclude_bos_as_target_and_obey_limit():
     contexts = list(iter_contexts([1, 3, 1, 4, 2], context_length=2, pair_limit=2))
     assert contexts == [[(1, 3), (1, 4)]]
+
+
+def test_frequency_baseline_uses_full_unigram_distribution(fast_config):
+    result = frequency_baseline([1, 0, 0, 2], [1, 0, 2], fast_config)
+    assert result["predicted_token_id"] == 0
+    assert result["top1_accuracy"] == 0.5
+    assert result["perplexity"] < 3

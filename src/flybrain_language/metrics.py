@@ -101,10 +101,12 @@ def run_sequence(
 
 def frequency_baseline(training_ids: list[int], evaluation_ids: list[int], config: ExperimentConfig) -> dict:
     targets = [pair[1] for context in iter_contexts(training_ids, config.context_length) for pair in context]
-    prediction = Counter(targets).most_common(1)[0][0]
+    counts = Counter(targets)
+    prediction = counts.most_common(1)[0][0]
     vocabulary_size = config.lexical_tokens + 3
     probability = np.full(vocabulary_size, 0.25)
-    probability[prediction] += len(targets)
+    for token, count in counts.items():
+        probability[token] += count
     probability /= probability.sum()
     records = []
     ranking = np.argsort(-probability, kind="stable")[:5].tolist()
