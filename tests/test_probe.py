@@ -7,7 +7,7 @@ from flybrain_language.linear_probe import evaluate_probe, fit_probe
 from flybrain_language.metrics import local_populations
 from flybrain_language.plasticity_probe import _evaluate
 from flybrain_language.probe_features import internal_indices
-from flybrain_language.probe_reporting import summarize_probes
+from flybrain_language.probe_reporting import summarize_plasticity_probes, summarize_probes
 from flybrain_language.simulator import FlyLIFSimulator
 
 
@@ -76,3 +76,23 @@ def test_plasticity_probe_scores_balanced_silent_outputs(
     result = _evaluate(simulator, inputs, outputs[:2], task, fast_config)
     assert result["accuracy"] == 0.5
     assert result["silent_fraction"] == 1.0
+
+
+def test_plasticity_summary_uses_paired_predictions(tmp_path):
+    run_dir = tmp_path / "plasticity"
+    run_dir.mkdir()
+    targets = list(make_task("association", 4, 11 + 303).labels)
+    raw = {
+        "task": "association", "seed": 11, "splits": {"test": 4},
+        "best_examples_seen": 2,
+        "results": {
+            "learned": {"accuracy": 1.0, "predictions": targets},
+            "frozen": {
+                "accuracy": 0.0, "predictions": [1 - target for target in targets],
+            },
+        },
+    }
+    (run_dir / "metrics.json").write_text(json.dumps(raw))
+    result = summarize_plasticity_probes([run_dir], tmp_path / "strict.json")
+    assert result["mean_accuracy"] == {"learned": 1.0, "frozen": 0.0}
+    assert result["hierarchical_bootstrap_95_ci"]["learned_minus_frozen"] == [1.0, 1.0]
