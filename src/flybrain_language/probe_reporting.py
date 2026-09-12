@@ -67,3 +67,51 @@ def summarize_probes(run_dirs: list[Path], output: Path) -> dict:
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n")
     return report
+
+
+def summarize_plasticity_probes(run_dirs: list[Path], output: Path) -> dict:
+    runs = [json.loads((run_dir / "metrics.json").read_text()) for run_dir in run_dirs]
+    runs.sort(key=lambda item: item["seed"])
+    if len({run["task"] for run in runs}) != 1:
+        raise ValueError("plasticity summary requires one task")
+    kinds = ("learned", "frozen")
+    hits = []
+    for run in runs:
+        targets = np.asarray(make_task(
+            run["task"], run["splits"]["test"], run["seed"] + 303
+        ).labels)
+        hits.append({
+            kind: np.asarray(run["results"][kind]["predictions"]) == targets
+            for kind in kinds
+        })
+    rng, differences, learned_samples = np.random.default_rng(7301), [], []
+    for _ in range(10_000):
+        selected = rng.integers(0, len(runs), len(runs))
+        learned, frozen = [], []
+        for run_index in selected:
+            indices = rng.integers(0, len(hits[run_index]["learned"]),
+                                   len(hits[run_index]["learned"]))
+            learned.append(float(hits[run_index]["learned"][indices].mean()))
+            frozen.append(float(hits[run_index]["frozen"][indices].mean()))
+        learned_samples.append(float(np.mean(learned)))
+        differences.append(float(np.mean(learned) - np.mean(frozen)))
+    report = {
+        "schema_version": 1, "task": runs[0]["task"], "chance": 0.5,
+        "per_seed": [{
+            "seed": run["seed"], "best_examples_seen": run["best_examples_seen"],
+            **{kind: run["results"][kind]["accuracy"] for kind in kinds},
+        } for run in runs],
+        "mean_accuracy": {
+            kind: float(np.mean([run["results"][kind]["accuracy"] for run in runs]))
+            for kind in kinds
+        },
+        "hierarchical_bootstrap_95_ci": {
+            "learned": _interval(learned_samples),
+            "learned_minus_frozen": _interval(differences),
+            "learned_minus_chance": _interval([value - 0.5 for value in learned_samples]),
+        },
+        "claim": "No learning unless learned-minus-frozen and learned-minus-chance are positive.",
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(report, indent=2) + "\n")
+    return report
