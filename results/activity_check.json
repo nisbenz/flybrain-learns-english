@@ -1,0 +1,53 @@
+{
+  "tokens": [
+    "<UNK>",
+    "<BOS>",
+    "<EOS>",
+    ",",
+    ":",
+    ".",
+    "the",
+    "and",
+    "to",
+    "i",
+    "of"
+  ],
+  "neurons": 2000,
+  "edges": 118527,
+  "plastic_edges": 28609,
+  "active_neurons_per_token": [
+    79,
+    90,
+    80,
+    81,
+    174,
+    203,
+    180,
+    72,
+    75,
+    78,
+    85
+  ],
+  "mean_firing_rate_hz_per_token": [
+    1.5318181818181817,
+    1.6090909090909091,
+    1.540909090909091,
+    1.5545454545454545,
+    2.3,
+    3.659090909090909,
+    3.286363636363636,
+    1.5136363636363637,
+    1.5136363636363637,
+    1.5318181818181817,
+    1.5772727272727274
+  ],
+  "minimum_pairwise_state_distance": 1.611667513847351,
+  "all_token_states_distinct": true,
+  "mean_seconds_per_word": 0.3390428496362471,
+  "peak_process_rss_mb": 306.546875,
+  "graph_array_mb": 2.3890180587768555,
+  "cpu": "13th Gen Intel(R) Core(TM) i5-13400F",
+  "logical_cpus": 16,
+  "platform": "Linux-7.2.2-1-cachyos-x86_64-with-glibc2.44",
+  "cuda_available": false
+}

@@ -1,0 +1,13 @@
+{
+  "source_parameter_matches": {
+    "v_rest_mv": true,
+    "v_threshold_mv": true,
+    "tau_mem_ms": true,
+    "tau_syn_ms": true,
+    "delay_ms": true,
+    "weight_scale_mv": true
+  },
+  "deterministic_update_max_abs_error": 6.262146570179539e-06,
+  "deterministic_parity": true,
+  "stochastic_check": "excluded; activity propagation is reported separately"
+}
