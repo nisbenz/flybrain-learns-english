@@ -63,6 +63,10 @@ def run_plasticity_probe(
     config = load_config(config_path)
     if noise_std_mv is not None:
         config.dynamics = replace(config.dynamics, noise_std_mv=noise_std_mv)
+    run_name = f"plasticity-{config.name}-{task_name}-seed{seed}-noise{config.dynamics.noise_std_mv:g}"
+    run_dir = project_root / "runs" / run_name
+    if (run_dir / "metrics.json").exists():
+        raise FileExistsError(f"completed diagnostic exists: {run_dir / 'metrics.json'}")
     data_dir, graph, books, vocabulary, _ = load_assets(project_root, config)
     inputs, all_outputs = local_populations(graph, books)
     outputs = all_outputs[[3, 4]]
@@ -96,8 +100,6 @@ def run_plasticity_probe(
         evaluation = FlyLIFSimulator(graph, config.dynamics, config.learning, seed + 900_000)
         evaluation.weights.copy_(weights)
         results[kind] = _evaluate(evaluation, inputs, outputs, test_task, config)
-    run_name = f"plasticity-{config.name}-{task_name}-seed{seed}-noise{config.dynamics.noise_std_mv:g}"
-    run_dir = project_root / "runs" / run_name
     run_dir.mkdir(parents=True, exist_ok=True)
     checkpoint = run_dir / "best.pt"
     torch.save({"weights": best_weights, "original_weights": simulator.original_weights}, checkpoint)
