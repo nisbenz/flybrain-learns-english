@@ -27,6 +27,14 @@ uv run flybrain-language summarize --runs \
 uv run pytest
 ```
 
+For the exact resolved environment used by the reported CPU run:
+
+```bash
+uv venv --python 3.12
+uv pip sync requirements.lock --python .venv/bin/python
+uv pip install --python .venv/bin/python --no-deps -e .
+```
+
 Omit the local repository arguments to fetch the pinned public files. The
 `pilot` command prepares data and runs three seeds plus baselines within its
 wall-clock budget:
