@@ -46,6 +46,9 @@ def build_parser() -> argparse.ArgumentParser:
     generation.add_argument("--start", default="<BOS>")
     semantic = commands.add_parser("analyze")
     semantic.add_argument("--run", type=Path, required=True)
+    summary = commands.add_parser("summarize")
+    summary.add_argument("--runs", type=Path, nargs="+", required=True)
+    summary.add_argument("--output", type=Path, default=Path("results"))
     pilot = commands.add_parser("pilot")
     pilot.add_argument("--config", type=Path, required=True)
     pilot.add_argument("--budget-minutes", type=float, default=120)
@@ -79,6 +82,9 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "analyze":
         from .semantic import analyze
         result = analyze(args.run.resolve(), root)
+    elif args.command == "summarize":
+        from .reporting import summarize
+        result = summarize([path.resolve() for path in args.runs], args.output.resolve())
     else:
         result = _pilot(args.config, root, args.budget_minutes)
     print(json.dumps(result, indent=2))
