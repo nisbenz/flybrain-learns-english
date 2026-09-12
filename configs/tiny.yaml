@@ -1,0 +1,19 @@
+name: tiny
+target_neurons: 2000
+lexical_tokens: 8
+input_cells: 64
+output_cells: 16
+max_hops: 3
+context_length: 32
+train_pairs: 384
+validation_pairs: 96
+test_pairs: 192
+seeds: [11, 23, 37]
+dynamics:
+  dt_ms: 0.1
+  input_rate_hz: 150.0
+  noise_std_mv: 0.025
+learning:
+  rate: 0.0005
+  baseline_decay: 0.98
+  regularization: 0.0001

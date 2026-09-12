@@ -1,0 +1,19 @@
+name: full
+target_neurons: null
+lexical_tokens: 128
+input_cells: 64
+output_cells: 16
+max_hops: 3
+context_length: 32
+train_pairs: 16384
+validation_pairs: 2048
+test_pairs: 4096
+seeds: [11, 23, 37]
+dynamics:
+  dt_ms: 0.1
+  input_rate_hz: 150.0
+  noise_std_mv: 0.025
+learning:
+  rate: 0.00025
+  baseline_decay: 0.99
+  regularization: 0.00005
