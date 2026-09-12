@@ -107,7 +107,12 @@ def summarize(run_dirs: list[Path], output_dir: Path) -> dict:
     if ablation_path.exists():
         ablations = _load_json(ablation_path)
         report["ablations"] = {
-            name: {"train_pairs": value["train_pairs"], **_compact(value["test"])}
+            name: {
+                "train_pairs": value["train_pairs"],
+                "best_pairs_seen": value.get("best_pairs_seen"),
+                "best_validation_accuracy": value.get("best_validation_accuracy"),
+                **_compact(value["test"]),
+            }
             for name, value in ablations.items()
         }
     (output_dir / "pilot_summary.json").write_text(

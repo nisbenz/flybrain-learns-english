@@ -34,20 +34,39 @@ def run_ablations(run_dir: Path, project_root: Path, pair_limit: int | None = No
     ):
         started = time.perf_counter()
         training = FlyLIFSimulator(variant, config.dynamics, config.learning, seed)
-        train_metrics, _, _ = run_sequence(
-            training, variant, books, splits["train"], config, limit, True
-        )
+        interval = min(96, max(1, limit // 4))
+        best_score, best_weights, best_pairs, train_metrics = -1.0, None, 0, None
+        for start in range(0, limit, interval):
+            length = min(interval, limit - start)
+            train_metrics, _, _ = run_sequence(
+                training, variant, books,
+                splits["train"][start : start + length + 1], config, length, True,
+            )
+            validation = FlyLIFSimulator(
+                variant, config.dynamics, config.learning, seed + 500_000
+            )
+            validation.weights.copy_(training.weights)
+            validation_metrics, _, _ = run_sequence(
+                validation, variant, books, splits["validation"], config,
+                config.validation_pairs, False,
+            )
+            if validation_metrics["top1_accuracy"] > best_score:
+                best_score = validation_metrics["top1_accuracy"]
+                best_weights = training.weights.clone()
+                best_pairs = start + length
         evaluation = FlyLIFSimulator(
             variant, config.dynamics, config.learning, seed + 900_000
         )
-        evaluation.weights.copy_(training.weights)
+        evaluation.weights.copy_(best_weights)
         test_metrics, records, _ = run_sequence(
             evaluation, variant, books, splits["test"], config,
             config.test_pairs, False,
         )
         results[name] = {
             "training": train_metrics, "test": test_metrics,
-            "train_pairs": limit, "elapsed_seconds": time.perf_counter() - started,
+            "train_pairs": limit, "best_pairs_seen": best_pairs,
+            "best_validation_accuracy": best_score,
+            "elapsed_seconds": time.perf_counter() - started,
         }
         (run_dir / f"{name}_predictions.jsonl").write_text(
             "".join(json.dumps(row) + "\n" for row in records)
