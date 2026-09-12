@@ -2,10 +2,13 @@ import json
 import numpy as np
 
 from flybrain_language.codebook import Codebooks
-from flybrain_language.diagnostic_tasks import direct_features, make_task
+from flybrain_language.diagnostic_tasks import DiagnosticTask, direct_features, make_task
 from flybrain_language.linear_probe import evaluate_probe, fit_probe
+from flybrain_language.metrics import local_populations
+from flybrain_language.plasticity_probe import _evaluate
 from flybrain_language.probe_features import internal_indices
 from flybrain_language.probe_reporting import summarize_probes
+from flybrain_language.simulator import FlyLIFSimulator
 
 
 def test_diagnostic_tasks_are_balanced_and_deterministic():
@@ -60,3 +63,16 @@ def test_probe_summary_reconstructs_held_out_targets(tmp_path):
     assert association["paired_hierarchical_bootstrap_95_ci"][
         "connectome_minus_disconnected"
     ] == [1.0, 1.0]
+
+
+def test_plasticity_probe_scores_balanced_silent_outputs(
+    small_graph, small_books, fast_config
+):
+    simulator = FlyLIFSimulator(
+        small_graph, fast_config.dynamics, fast_config.learning, seed=4
+    )
+    inputs, outputs = local_populations(small_graph, small_books)
+    task = DiagnosticTask("association", ((0,), (1,), (0,), (1,)), (0, 1, 0, 1))
+    result = _evaluate(simulator, inputs, outputs[:2], task, fast_config)
+    assert result["accuracy"] == 0.5
+    assert result["silent_fraction"] == 1.0
