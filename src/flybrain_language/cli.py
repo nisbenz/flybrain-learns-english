@@ -48,6 +48,15 @@ def build_parser() -> argparse.ArgumentParser:
     generation.add_argument("--start", default="<BOS>")
     semantic = commands.add_parser("analyze")
     semantic.add_argument("--run", type=Path, required=True)
+    probe = commands.add_parser("probe")
+    probe.add_argument("--config", type=Path, required=True)
+    probe.add_argument(
+        "--task", choices=("association", "delayed_context"), required=True
+    )
+    probe.add_argument("--seed", type=int, required=True)
+    probe.add_argument("--train-examples", type=int, default=32)
+    probe.add_argument("--validation-examples", type=int, default=16)
+    probe.add_argument("--test-examples", type=int, default=32)
     summary = commands.add_parser("summarize")
     summary.add_argument("--runs", type=Path, nargs="+", required=True)
     summary.add_argument("--output", type=Path, default=Path("results"))
@@ -87,6 +96,12 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "analyze":
         from .semantic import analyze
         result = analyze(args.run.resolve(), root)
+    elif args.command == "probe":
+        from .probe import run_probe
+        result = {"run": str(run_probe(
+            args.config, root, args.task, args.seed, args.train_examples,
+            args.validation_examples, args.test_examples,
+        ))}
     elif args.command == "summarize":
         from .reporting import summarize
         result = summarize([path.resolve() for path in args.runs], args.output.resolve())
