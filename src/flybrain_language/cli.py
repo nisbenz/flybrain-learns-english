@@ -57,6 +57,9 @@ def build_parser() -> argparse.ArgumentParser:
     probe.add_argument("--train-examples", type=int, default=32)
     probe.add_argument("--validation-examples", type=int, default=16)
     probe.add_argument("--test-examples", type=int, default=32)
+    probe_summary = commands.add_parser("probe-summary")
+    probe_summary.add_argument("--runs", type=Path, nargs="+", required=True)
+    probe_summary.add_argument("--output", type=Path, required=True)
     summary = commands.add_parser("summarize")
     summary.add_argument("--runs", type=Path, nargs="+", required=True)
     summary.add_argument("--output", type=Path, default=Path("results"))
@@ -102,6 +105,11 @@ def main(argv: list[str] | None = None) -> None:
             args.config, root, args.task, args.seed, args.train_examples,
             args.validation_examples, args.test_examples,
         ))}
+    elif args.command == "probe-summary":
+        from .probe_reporting import summarize_probes
+        result = summarize_probes(
+            [path.resolve() for path in args.runs], args.output.resolve()
+        )
     elif args.command == "summarize":
         from .reporting import summarize
         result = summarize([path.resolve() for path in args.runs], args.output.resolve())
