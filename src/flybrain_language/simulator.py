@@ -46,6 +46,7 @@ class FlyLIFSimulator:
         self.rewards_seen = 0
         self.total_spikes = 0
         self.steps = 0
+        self.activity_counts = torch.zeros(self.neuron_count, dtype=torch.long)
         self.reset()
 
     @property
@@ -95,6 +96,7 @@ class FlyLIFSimulator:
         self._update_eligibility()
         count = int(state.spikes.sum())
         self.total_spikes += count
+        self.activity_counts.add_(state.spikes.long())
         self.steps += 1
         return state.spikes
 
@@ -174,6 +176,7 @@ class FlyLIFSimulator:
             "state": self.state.__dict__, "generator_state": self.generator.get_state(),
             "reward_baseline": self.reward_baseline, "rewards_seen": self.rewards_seen,
             "total_spikes": self.total_spikes, "steps": self.steps,
+            "activity_counts": self.activity_counts,
             "metadata": metadata or {},
         }, path)
 
@@ -187,4 +190,5 @@ class FlyLIFSimulator:
         self.rewards_seen = raw["rewards_seen"]
         self.total_spikes = raw["total_spikes"]
         self.steps = raw["steps"]
+        self.activity_counts.copy_(raw["activity_counts"])
         return raw["metadata"]
