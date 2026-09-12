@@ -60,6 +60,16 @@ def build_parser() -> argparse.ArgumentParser:
     probe_summary = commands.add_parser("probe-summary")
     probe_summary.add_argument("--runs", type=Path, nargs="+", required=True)
     probe_summary.add_argument("--output", type=Path, required=True)
+    plasticity = commands.add_parser("plasticity-probe")
+    plasticity.add_argument("--config", type=Path, required=True)
+    plasticity.add_argument(
+        "--task", choices=("association", "delayed_context"), required=True
+    )
+    plasticity.add_argument("--seed", type=int, required=True)
+    plasticity.add_argument("--train-examples", type=int, default=128)
+    plasticity.add_argument("--validation-examples", type=int, default=32)
+    plasticity.add_argument("--test-examples", type=int, default=64)
+    plasticity.add_argument("--noise-std-mv", type=float)
     summary = commands.add_parser("summarize")
     summary.add_argument("--runs", type=Path, nargs="+", required=True)
     summary.add_argument("--output", type=Path, default=Path("results"))
@@ -110,6 +120,12 @@ def main(argv: list[str] | None = None) -> None:
         result = summarize_probes(
             [path.resolve() for path in args.runs], args.output.resolve()
         )
+    elif args.command == "plasticity-probe":
+        from .plasticity_probe import run_plasticity_probe
+        result = {"run": str(run_plasticity_probe(
+            args.config, root, args.task, args.seed, args.train_examples,
+            args.validation_examples, args.test_examples, args.noise_std_mv,
+        ))}
     elif args.command == "summarize":
         from .reporting import summarize
         result = summarize([path.resolve() for path in args.runs], args.output.resolve())
