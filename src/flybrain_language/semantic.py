@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
+os.environ.setdefault("MPLCONFIGDIR", "/tmp/flybrain-matplotlib")
 import matplotlib
 import numpy as np
 
@@ -63,7 +65,8 @@ def analyze(run_dir: Path, project_root: Path) -> dict:
     internal = ~np.isin(graph.flywire_ids, list(excluded_ids))
     similarities, counts, means = {}, None, {}
     for condition, values in arrays.items():
-        condition_means, condition_counts = _token_means(values[:, internal], inputs, len(vocabulary.tokens))
+        centered = values[:, internal].astype(np.float32) - config.dynamics.v_rest_mv
+        condition_means, condition_counts = _token_means(centered, inputs, len(vocabulary.tokens))
         means[condition] = condition_means
         similarities[condition] = _cosine(condition_means)
         counts = condition_counts
