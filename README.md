@@ -67,7 +67,8 @@ and representations can grow. Compact measured outputs are checked in under
 - `pilot_summary.json`: three-seed metrics, paired context bootstrap intervals,
   and topology controls.
 - `activity_check.json`: propagation, throughput, memory, and hardware.
-- `performance.png` and `training_stability.png`: small result plots.
+- `performance.png`, `training_stability.png`, and `semantic_cosine_seed11.png`:
+  small result plots, including the held-out state-similarity diagnostic.
 
 The complete raw-source manifest is generated at `data/raw/manifest.json`; the
 processed graph manifest records the selected neuron/edge counts, data hashes,

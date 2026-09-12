@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 from collections import defaultdict
 from pathlib import Path
 
@@ -114,6 +115,7 @@ def summarize(run_dirs: list[Path], output_dir: Path) -> dict:
     )
     _performance_plot(aggregate, output_dir / "performance.png")
     _training_plot(training, output_dir / "training_stability.png")
+    shutil.copyfile(run_dirs[0] / "semantic_cosine.png", output_dir / "semantic_cosine_seed11.png")
     return report
 
 
@@ -126,7 +128,7 @@ def _performance_plot(aggregate: dict, path: Path) -> None:
         means = [aggregate[condition][field]["mean"] for field in fields]
         errors = [aggregate[condition][field]["sample_sd"] for field in fields]
         axis.bar(x + offset, means, 0.24, yerr=errors, label=condition, capsize=3)
-    axis.axhline(0.1, color="black", linestyle="--", linewidth=1, label="uniform top-1 chance")
+    axis.plot(x, [0.1, 0.5, 0.1, 0.1], "k--", linewidth=1, label="uniform chance")
     axis.set_xticks(x, labels)
     axis.set_ylim(0, 1)
     axis.set_ylabel("accuracy (mean ± sample SD across 3 seeds)")
