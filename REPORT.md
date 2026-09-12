@@ -68,6 +68,43 @@ and −0.047. Frozen correlations were 0.009, −0.157, and −0.073. These valu
 show no consistent trained improvement. `king` and `queen` are outside this
 eight-token vocabulary, so that comparison is explicitly unavailable.
 
+## FLM-inspired simpler benchmarks
+
+The diagnostic design follows FLM revision
+`7251a8921db4f891c39bd75ee5ad827f7031a24b`: use balanced synthetic examples,
+freeze the connectome while testing its state with a small validation-selected
+readout, and compare a parameter-matched direct-input path and a graph with all
+edges removed. This project does not use FLM's pretrained language model or
+abstract rate recurrence in the anatomical learning experiment.
+
+The association task distinguishes two single-token cues. The delayed-context
+task distinguishes the same cues after both are followed by one shared token.
+Each seed used 32 balanced training, 16 validation, and 32 held-out test
+examples. Graph features contain 1,154 internal neurons after every input and
+output neuron is excluded. The bias-free readout has 2,308 parameters in every
+condition.
+
+| Diagnostic | Frozen connectome probe | Direct input | Disconnected graph |
+| --- | ---: | ---: | ---: |
+| Association | 0.6979 | 1.0000 | 0.5104 |
+| Delayed context | 0.5000 | 1.0000 | 0.5521 |
+
+For association, connectome-minus-disconnected was 0.1875 with a paired
+hierarchical-bootstrap 95% interval of [0.0625, 0.3229]. Connectome-minus-
+chance was [0.0833, 0.3125]. This supports a narrow claim: present-cue identity
+is decodable from frozen internal activity. Delayed-context accuracy was
+exactly chance across seeds; its connectome-minus-chance interval was
+[−0.1354, 0.1354]. The current word timing does not expose reliable memory of
+the earlier cue.
+
+The stricter association task retained fixed two-population spike-count output
+and trained only the 28,609 anatomical plastic edges. It used 128 balanced
+training, 32 validation, and 64 test examples per seed. Learned accuracy was
+0.4583 versus 0.4531 frozen. Learned-minus-chance had a 95% interval of
+[−0.1146, 0.0313], so internal learning failed even on this simpler task. The
+successful linear probe is diagnostic evidence of available signal, not
+evidence of synaptic learning.
+
 ## Limitations and next experiment
 
 The vocabulary policy causes severe `<UNK>` imbalance, scalar reinforcement is
@@ -81,4 +118,7 @@ not run because the eight-token success gate failed. Projection-neuron input,
 whole-network plasticity, and a conventional recurrent-spiking baseline remain
 future experiments. A scientifically useful next pilot should reduce unknown
 imbalance, calibrate output-population activity without language labels, and
-compare learning rules only after frozen output silence is resolved.
+compare local credit rules on the balanced association task before returning
+to language. The probe results specifically favor a local supervised or
+perturbation-based three-factor rule that can route an already decodable cue to
+the fixed outputs.

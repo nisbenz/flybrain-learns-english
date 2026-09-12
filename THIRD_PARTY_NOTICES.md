@@ -9,4 +9,10 @@ license. FlyWire annotation data are pinned to commit
 upstream terms and required scholarly citations. Tiny Shakespeare is used as
 the language corpus and remains subject to its source terms.
 
+The balanced diagnostic design and matched direct-input/no-edge controls were
+informed by Alex Wormuth's `nftechie/flm` at commit
+`7251a8921db4f891c39bd75ee5ad827f7031a24b`, whose original source is MIT
+licensed. No FLM model weights, training data, or connectome arrays are
+vendored here.
+
 Generated manifests record source URLs, revisions, and SHA-256 checksums.

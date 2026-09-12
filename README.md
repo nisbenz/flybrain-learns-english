@@ -27,6 +27,36 @@ uv run flybrain-language summarize --runs \
 uv run pytest
 ```
 
+The FLM-inspired diagnostic curriculum separates representational capacity from
+internal plasticity. Run the frozen-state readout and the stricter anatomical
+plasticity task independently:
+
+```bash
+for task in association delayed_context; do
+  for seed in 11 23 37; do
+    uv run flybrain-language probe --config configs/tiny.yaml \
+      --task "$task" --seed "$seed"
+  done
+done
+uv run flybrain-language probe-summary --runs runs/probe-tiny-* \
+  --output results/probe_summary.json
+
+for seed in 11 23 37; do
+  uv run flybrain-language plasticity-probe --config configs/tiny.yaml \
+    --task association --seed "$seed"
+done
+uv run flybrain-language plasticity-summary \
+  --runs runs/plasticity-tiny-association-seed*-noise0.025 \
+  --output results/plasticity_probe_summary.json
+```
+
+`probe` trains a bias-free diagnostic readout while freezing the graph and
+excluding every input/output population from its features. Its direct-input
+and disconnected controls have exactly the same readout size. This diagnostic
+does not satisfy the project's internal-plasticity learning criterion.
+`plasticity-probe` retains the fixed spike-count decoder and trains only the
+existing anatomical plastic-edge mask.
+
 For the exact resolved environment used by the reported CPU run:
 
 ```bash
@@ -66,6 +96,8 @@ and representations can grow. Compact measured outputs are checked in under
 
 - `pilot_summary.json`: three-seed metrics, paired context bootstrap intervals,
   and topology controls.
+- `probe_summary.json`: balanced association and delayed-context readout tests.
+- `plasticity_probe_summary.json`: the matching internal-plasticity test.
 - `activity_check.json`: propagation, throughput, memory, and hardware.
 - `performance.png`, `training_stability.png`, and `semantic_cosine_seed11.png`:
   small result plots, including the held-out state-similarity diagnostic.
