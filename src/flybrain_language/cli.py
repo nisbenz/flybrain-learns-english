@@ -11,7 +11,6 @@ from .experiment import evaluate, train
 from .generation import generate
 from .prepare import prepare_assets
 from .reference import run_reference_check
-from .semantic import analyze
 from .sources import download_sources
 
 
@@ -78,6 +77,7 @@ def main(argv: list[str] | None = None) -> None:
     elif args.command == "generate":
         result = {"tokens": generate(args.run.resolve(), root, args.length, args.start)}
     elif args.command == "analyze":
+        from .semantic import analyze
         result = analyze(args.run.resolve(), root)
     else:
         result = _pilot(args.config, root, args.budget_minutes)
@@ -85,6 +85,7 @@ def main(argv: list[str] | None = None) -> None:
 
 
 def _pilot(config_path: Path, root: Path, budget_minutes: float) -> dict:
+    from .semantic import analyze
     started = time.perf_counter()
     deadline = started + budget_minutes * 60
     prepared = root / "data" / "processed" / load_config(config_path).name
