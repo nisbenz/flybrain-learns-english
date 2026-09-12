@@ -1,0 +1,105 @@
+{
+  "schema_version": 1,
+  "tasks": {
+    "association": {
+      "per_seed": [
+        {
+          "seed": 11,
+          "connectome": 0.65625,
+          "direct": 1.0,
+          "disconnected": 0.53125
+        },
+        {
+          "seed": 23,
+          "connectome": 0.65625,
+          "direct": 1.0,
+          "disconnected": 0.375
+        },
+        {
+          "seed": 37,
+          "connectome": 0.78125,
+          "direct": 1.0,
+          "disconnected": 0.625
+        }
+      ],
+      "mean_accuracy": {
+        "connectome": 0.6979166666666666,
+        "direct": 1.0,
+        "disconnected": 0.5104166666666666
+      },
+      "paired_hierarchical_bootstrap_95_ci": {
+        "connectome": [
+          0.5833333333333334,
+          0.8125
+        ],
+        "direct": [
+          1.0,
+          1.0
+        ],
+        "disconnected": [
+          0.3541666666666667,
+          0.65625
+        ],
+        "connectome_minus_disconnected": [
+          0.0625,
+          0.3229166666666667
+        ],
+        "connectome_minus_chance": [
+          0.08333333333333337,
+          0.3125
+        ]
+      },
+      "chance": 0.5
+    },
+    "delayed_context": {
+      "per_seed": [
+        {
+          "seed": 11,
+          "connectome": 0.5,
+          "direct": 1.0,
+          "disconnected": 0.4375
+        },
+        {
+          "seed": 23,
+          "connectome": 0.40625,
+          "direct": 1.0,
+          "disconnected": 0.59375
+        },
+        {
+          "seed": 37,
+          "connectome": 0.59375,
+          "direct": 1.0,
+          "disconnected": 0.625
+        }
+      ],
+      "mean_accuracy": {
+        "connectome": 0.5,
+        "direct": 1.0,
+        "disconnected": 0.5520833333333334
+      },
+      "paired_hierarchical_bootstrap_95_ci": {
+        "connectome": [
+          0.3645833333333333,
+          0.6354166666666666
+        ],
+        "direct": [
+          1.0,
+          1.0
+        ],
+        "disconnected": [
+          0.4166666666666667,
+          0.6770833333333334
+        ],
+        "connectome_minus_disconnected": [
+          -0.22916666666666669,
+          0.125
+        ],
+        "connectome_minus_chance": [
+          -0.13541666666666669,
+          0.13541666666666663
+        ]
+      },
+      "chance": 0.5
+    }
+  }
+}
