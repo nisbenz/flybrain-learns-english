@@ -31,6 +31,8 @@ def build_parser() -> argparse.ArgumentParser:
     prepare.add_argument("--config", type=Path, required=True)
     reference = commands.add_parser("reference-check")
     reference.add_argument("--config", type=Path, required=True)
+    activity = commands.add_parser("activity-check")
+    activity.add_argument("--config", type=Path, required=True)
     training = commands.add_parser("train")
     training.add_argument("--config", type=Path, required=True)
     training.add_argument("--seed", type=int, required=True)
@@ -71,6 +73,9 @@ def main(argv: list[str] | None = None) -> None:
             root / "data" / "raw", config.dynamics,
             root / "runs" / "reference_check.json",
         )
+    elif args.command == "activity-check":
+        from .activity import run_activity_check
+        result = run_activity_check(args.config, root, root / "results" / "activity_check.json")
     elif args.command == "train":
         result = {"run": str(train(args.config, root, args.seed, args.pairs))}
     elif args.command == "evaluate":
